@@ -25,6 +25,8 @@ from keras.layers.recurrent import LSTM
 parser = argparse.ArgumentParser()
 parser.add_argument('-test_app', '--test_app', action='store_true', help='test the app interface')
 parser.add_argument('-source', '--source', type=str, help="Data source: [json|csv]")
+parser.add_argument('-model_json_out', '--model_json_out', str, default='u45_model.json', help="Path to save model json")
+parser.add_argument('-out_weights', '--out_weights', str, default='u45_weights.h5', help="Path to save model weights in h5")
 
 
 # REFERENCES!
@@ -144,11 +146,6 @@ class U45(object):
         # print max([len(self.dataDX[i]['text']) for i in self.dataDX.keys()])
         # print [self.dataDX[i]['text'] for i in self.dataDX.keys() if len(self.dataDX[i]['text']) == 311]
 
-        
-
-        
-
-
 
 
 
@@ -169,3 +166,12 @@ if __name__ == "__main__":
         u45.build_lstm()
         sys.stderr.write("Training lstm...\n")
         u45.model.fit(X, y, batch_size=16, epochs=10, callbacks=[LambdaCallback(on_epoch_end=u45.on_epoch_end)])
+        # Save model...
+        model_json = u45.model.to_json()
+        with open(args.model_json_out, 'w') as json_file:
+            json_file.write(model_json)
+        sys.stderr.write("Saved model to {PATH}...\n".format(PATH=args.model_json))
+
+        # Save weights...
+        u45.model.save_weights(args.out_weights)
+        sys.stderr.write("Saved weights to {PATH}...\n".format(PATH=args.out_weights))
