@@ -179,8 +179,11 @@ if __name__ == "__main__":
         u45.model_json_out = args.model_json_out
         u45.out_weights = args.out_weights
         
-        # Train!
+        # Train w2v!
+        # TODO: GET A SECOND TWITTER CORPUS TO INCLUDE IN THE W2V TRAINING
         u45.train_w2v(sentences=u45.get_all_sentences())
+        
+        # Train LSTM!
         X, y = u45.pre_lstm(sentences=u45.get_all_sentences())
         u45.build_lstm()
         sys.stderr.write("Training lstm...\n")
