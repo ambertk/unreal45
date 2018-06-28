@@ -38,21 +38,36 @@ MAX_LENGTH = 350
 
 class U45(object):
     def on_epoch_end(self, epoch, _):
+        # Save model...
+        model_json = u45.model.to_json()
+        with open(self.model_json_out, 'w') as json_file:
+            json_file.write(model_json)
+        sys.stderr.write("Saved model to {PATH}...\n".format(PATH=self.model_json_out))
+
+        # Save weights...
+        u45.model.save_weights(self.out_weights)
+        sys.stderr.write("Saved weights to {PATH}...\n".format(PATH=self.out_weights))
+
         print '\nGenerating text after epoch: %d' % epoch
         texts = [
             'crooked',
             'crooked Hillary',
             'whale',
             'baseball',
-            'friendship',
-            'mutton'
+            'friend',
         ]
         for text in texts:
             sample = self.generate_next(text=text)
             print "{TEXT} --> {SAMPLE}".format(TEXT=text, SAMPLE=sample)
         
     def generate_next(self, text, num_generated=10):
-        word_idxs = [self.word2idx(word) for word in text.lower().split()]
+        word_idxs = []
+        for word in text.lower().split():
+            try:
+                word_idxs.extend(self.word2idx(word))
+            except:
+                sys.stderr.write("{WORD} not found in corpus...\n".format(WORD=word))
+
         for i in range(num_generated):
             prediction = self.model.predict(x=np.array(word_idxs))
             idx = self.sample(prediction[-1], temperature=0.7)
@@ -161,11 +176,16 @@ if __name__ == "__main__":
     DATA = glob.glob(os.path.join("Data", source))
     if args.test_app:
         u45 = U45(data=DATA)
+        u45.model_json_out = args.model_json_out
+        u45.out_weights = args.out_weights
+        
+        # Train!
         u45.train_w2v(sentences=u45.get_all_sentences())
         X, y = u45.pre_lstm(sentences=u45.get_all_sentences())
         u45.build_lstm()
         sys.stderr.write("Training lstm...\n")
         u45.model.fit(X, y, batch_size=16, epochs=10, callbacks=[LambdaCallback(on_epoch_end=u45.on_epoch_end)])
+        
         # Save model...
         model_json = u45.model.to_json()
         with open(args.model_json_out, 'w') as json_file:
