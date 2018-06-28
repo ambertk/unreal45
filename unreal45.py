@@ -85,7 +85,7 @@ class U45(object):
         return np.argmax(probas)
 
     def build_lstm(self):
-        sys.stderr.write("Building lstm...")
+        sys.stderr.write("Training lstm on Trump data...")
         self.model = Sequential()
         self.model.add(Embedding(input_dim=self.vocab_size, output_dim=self.emdedding_size, weights=[self.pretrained_weights]))
         self.model.add(LSTM(units=self.emdedding_size))
@@ -111,11 +111,17 @@ class U45(object):
         return self.w2v_model.wv.index2word[idx]
 
     def train_w2v(self, sentences):
-        sys.stderr.write("Training w2v...")
-        self.w2v_model = gensim.models.Word2Vec(sentences, size=MAX_LENGTH, min_count=1, window=5, iter=100)
+        if os.path.exists('w2v_model'):
+            sys.stderr.write("Loading w2v from {W2VSAVEPATH}...\n".format(W2VSAVEPATH='w2v_model'))
+            self.w2v_model = gensim.models.Word2Vec.load('w2v_model')
+        else:
+            sys.stderr.write("Training w2v on all data...")
+            self.w2v_model = gensim.models.Word2Vec(sentences, size=MAX_LENGTH, min_count=1, window=5, iter=100)
+            sys.stderr.write("done.\n")
+            sys.stderr.write("Saving w2v model to {W2VSAVEPATH}\n".format(W2VSAVEPATH='w2v_model'))
+            self.w2v_model.save('w2v_model')
         self.pretrained_weights = self.w2v_model.wv.syn0
         self.vocab_size, self.emdedding_size = self.pretrained_weights.shape
-        sys.stderr.write("done.\n")
 
     def clean_text(self, text):
         text = text.replace('&amp;', '&')
@@ -134,6 +140,9 @@ class U45(object):
 
     def get_all_sentences(self):
         return [self.dataDX[i]['text'] for i in self.dataDX.keys()]
+    
+    def get_lstm_sentences(self):
+        return [self.lstmDX[i]['text'] for i in self.dataDX.keys()]
 
     def read_csvs(self, csvs):
         pass
@@ -141,21 +150,28 @@ class U45(object):
     def read_jsons(self, jsons):
         dataDX = {}
         for i in jsons:
-            F = open(i, 'r').read()
-            data = json.loads(F)
-            for i in data:
-                dataDX[i['id_str']] = i
-                dataDX[i['id_str']]['text'] = self.clean_text(text=dataDX[i['id_str']]['text']).split()
+            sys.stderr.write("Reading {PATH}...".format(PATH=i))
+            try:
+                F = open(i, 'r').read()
+                data = json.loads(F)
+                for i in data:
+                    dataDX[i['id_str']] = i
+                    dataDX[i['id_str']]['text'] = self.clean_text(text=dataDX[i['id_str']]['text']).split()
+                sys.stderr.write("done.\n")
+            except:
+                sys.stderr.write("failed.\n")
         return dataDX
 
 
-    def __init__(self, data):
+    def __init__(self, data, lstm_data):
         super(U45, self).__init__()
         
         if os.path.basename(data[0]).split('.')[1] == 'json':
             self.dataDX = self.read_jsons(jsons=data)
+            self.lstmDX = self.read_jsons(jsons=lstm_data)
         elif os.path.basename(data[0]).split('.')[1] == 'csv':
             self.dataDX = self.read_csvs(csvs=data)
+            self.lstmDX = self.read_csvs(jsons=lstm_data)
         
         #pprint.pprint(self.dataDX)
         # print max([len(self.dataDX[i]['text']) for i in self.dataDX.keys()])
@@ -170,12 +186,15 @@ if __name__ == "__main__":
 
     # Get data path...
     if args.source == 'json':
-        source = '*.json'
+        sources = '*.json'
+        lstm_source = 'trump*.json'
     elif args.source == 'csv':
-        source = '*.csv'
-    DATA = glob.glob(os.path.join("Data", source))
+        sources = '*.csv'
+        lstm_source = 'trump*.csv'
+    DATA = glob.glob(os.path.join("Data", sources))
+    LSTM_DATA = glob.glob(os.path.join("Data", lstm_source))
     if args.test_app:
-        u45 = U45(data=DATA)
+        u45 = U45(data=DATA, lstm_data=LSTM_DATA)
         u45.model_json_out = args.model_json_out
         u45.out_weights = args.out_weights
         
@@ -184,7 +203,7 @@ if __name__ == "__main__":
         u45.train_w2v(sentences=u45.get_all_sentences())
         
         # Train LSTM!
-        X, y = u45.pre_lstm(sentences=u45.get_all_sentences())
+        X, y = u45.pre_lstm(sentences=u45.get_lstm_sentences())
         u45.build_lstm()
         sys.stderr.write("Training lstm...\n")
         u45.model.fit(X, y, batch_size=16, epochs=10, callbacks=[LambdaCallback(on_epoch_end=u45.on_epoch_end)])
