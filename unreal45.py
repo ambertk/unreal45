@@ -34,7 +34,6 @@ parser.add_argument('-source', '--source', type=str, help="Data source: [json|cs
 # CONSTANTS!
 MAX_LENGTH = 350
 
-
 class U45(object):
     def on_epoch_end(self, epoch, _):
         print '\nGenerating text after epoch: %d' % epoch
@@ -88,18 +87,17 @@ class U45(object):
             y[i] = self.word2idx(sentence[-1])
         return X, y
 
-    def word2idx(word):
-        return word_model.wv.vocab[word].index
+    def word2idx(self, word):
+        return self.w2v_model.wv.vocab[word].index
 
-    def idx2word(idx):
-        return word_model.wv.index2word[idx]
+    def idx2word(self, idx):
+        return self.w2v_model.wv.index2word[idx]
 
     def train_w2v(self, sentences):
         sys.stderr.write("Training w2v...")
-        #word_model = gensim.models.Word2Vec(sentences, size=100, min_count=1, window=5, iter=100)
-        self.model = gensim.models.Word2Vec(sentences, size=MAX_LENGTH, min_count=1, window=5, iter=100)
-        self.pretrained_weights = word_model.wv.syn0
-        self.vocab_size, self.emdedding_size = pretrained_weights.shape
+        self.w2v_model = gensim.models.Word2Vec(sentences, size=MAX_LENGTH, min_count=1, window=5, iter=100)
+        self.pretrained_weights = self.w2v_model.wv.syn0
+        self.vocab_size, self.emdedding_size = self.pretrained_weights.shape
         sys.stderr.write("done.\n")
 
     def clean_text(self, text):
@@ -130,7 +128,7 @@ class U45(object):
             data = json.loads(F)
             for i in data:
                 dataDX[i['id_str']] = i
-                dataDX[i['id_str']]['text'] = self.clean_text(text=dataDX[i['id_str']]['text'])
+                dataDX[i['id_str']]['text'] = self.clean_text(text=dataDX[i['id_str']]['text']).split()
         return dataDX
 
 
@@ -170,4 +168,4 @@ if __name__ == "__main__":
         X, y = u45.pre_lstm(sentences=u45.get_all_sentences())
         u45.build_lstm()
         sys.stderr.write("Training lstm...\n")
-        u45.model.fit(X, y, batch_size=16, epochs=10, callbacks=[LambdaCallback(on_epoch_end=on_epoch_end)])
+        u45.model.fit(X, y, batch_size=16, epochs=10, callbacks=[LambdaCallback(on_epoch_end=u45.on_epoch_end)])
