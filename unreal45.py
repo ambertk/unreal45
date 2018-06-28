@@ -25,8 +25,8 @@ from keras.layers.recurrent import LSTM
 parser = argparse.ArgumentParser()
 parser.add_argument('-test_app', '--test_app', action='store_true', help='test the app interface')
 parser.add_argument('-source', '--source', type=str, help="Data source: [json|csv]")
-parser.add_argument('-model_json_out', '--model_json_out', str, default='u45_model.json', help="Path to save model json")
-parser.add_argument('-out_weights', '--out_weights', str, default='u45_weights.h5', help="Path to save model weights in h5")
+parser.add_argument('-model_json_out', '--model_json_out', type=str, default='u45_model.json', help="Path to save model json")
+parser.add_argument('-out_weights', '--out_weights', type=str, default='u45_weights.h5', help="Path to save model weights in h5")
 
 
 # REFERENCES!
