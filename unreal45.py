@@ -111,11 +111,12 @@ class U45(object):
     def idx2word(self, idx):
         return self.w2v_model.wv.index2word[idx]
 
-    def train_w2v(self, sentences):
+    def train_w2v(self):
         if os.path.exists('w2v_model'):
             sys.stderr.write("Loading w2v from {W2VSAVEPATH}...\n".format(W2VSAVEPATH='w2v_model'))
             self.w2v_model = gensim.models.Word2Vec.load('w2v_model')
         else:
+            sentences = self.get_all_sentences()
             sys.stderr.write("Training w2v on all data...")
             self.w2v_model = gensim.models.Word2Vec(sentences, size=MAX_LENGTH, min_count=1, window=5, iter=100)
             sys.stderr.write("done.\n")
@@ -203,7 +204,7 @@ if __name__ == "__main__":
         
         # Train w2v!
         # TODO: GET A SECOND TWITTER CORPUS TO INCLUDE IN THE W2V TRAINING
-        u45.train_w2v(sentences=u45.get_all_sentences())
+        u45.train_w2v()
         
         # Train LSTM!
         X, y = u45.pre_lstm(sentences=u45.get_lstm_sentences())
