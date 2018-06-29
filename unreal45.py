@@ -113,8 +113,9 @@ class U45(object):
 
     def train_w2v(self):
         if os.path.exists('w2v_model'):
-            sys.stderr.write("Loading w2v from {W2VSAVEPATH}...\n".format(W2VSAVEPATH='w2v_model'))
+            sys.stderr.write("Loading w2v from {W2VSAVEPATH}...".format(W2VSAVEPATH='w2v_model'))
             self.w2v_model = gensim.models.Word2Vec.load('w2v_model')
+            sys.stderr.write("done.\n")
         else:
             sentences = self.get_all_sentences()
             sys.stderr.write("Training w2v on all data...")
