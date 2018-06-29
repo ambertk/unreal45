@@ -13,6 +13,7 @@ import os.path
 import argparse
 import numpy as np
 import tensorflow as tf
+import keras.backend as K
 from keras.models import Sequential
 from keras.layers import Dense, Activation
 from keras.layers.embeddings import Embedding
@@ -36,6 +37,16 @@ parser.add_argument('-out_weights', '--out_weights', type=str, default='u45_weig
 
 # CONSTANTS!
 MAX_LENGTH = 350
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+num_threads = 44
+num_inter_op_threads = 22
+os.environ["OMP_NUM_THREADS"]= str(num_threads)
+os.environ['INTRA_THREADS']=str(num_threads)
+os.environ['INTER_THREADS']=str(num_inter_op_threads)
+os.environ['KMP_AFFINITY']='granularity=fine,compact,1,0'
+sess = tf.Session(config=tf.ConfigProto(intra_op_parallelism_threads=num_threads, inter_op_parallelism_threads=num_inter_op_threads))
+K.set_session(sess)
 
 class U45(object):
     def on_epoch_end(self, epoch, _):
