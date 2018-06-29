@@ -32,6 +32,7 @@ parser.add_argument('-out_weights', '--out_weights', type=str, default='u45_weig
 # REFERENCES!
 # http://www.trumptwitterarchive.com/archive
 # https://gist.github.com/maxim5/c35ef2238ae708ccb0e55624e9e0252b
+# Additional training data: http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip
 
 # CONSTANTS!
 MAX_LENGTH = 350
@@ -167,10 +168,12 @@ class U45(object):
         super(U45, self).__init__()
         
         if os.path.basename(data[0]).split('.')[1] == 'json':
-            self.dataDX = self.read_jsons(jsons=data)
+            if not os.path.exists('w2v_model'):
+                self.dataDX = self.read_jsons(jsons=data)
             self.lstmDX = self.read_jsons(jsons=lstm_data)
         elif os.path.basename(data[0]).split('.')[1] == 'csv':
-            self.dataDX = self.read_csvs(csvs=data)
+            if not os.path.exists('w2v_model'):
+                self.dataDX = self.read_csvs(csvs=data)
             self.lstmDX = self.read_csvs(jsons=lstm_data)
         
         #pprint.pprint(self.dataDX)
