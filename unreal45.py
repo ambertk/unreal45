@@ -145,7 +145,7 @@ class U45(object):
         return [self.dataDX[i]['text'] for i in self.dataDX.keys()]
     
     def get_lstm_sentences(self):
-        return [self.lstmDX[i]['text'] for i in self.dataDX.keys()]
+        return [self.lstmDX[i]['text'] for i in self.lstmDX.keys()]
 
     def read_csvs(self, csvs):
         pass
