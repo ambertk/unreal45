@@ -27,6 +27,7 @@ from keras.layers.recurrent import LSTM
 parser = argparse.ArgumentParser()
 parser.add_argument('-train', '--train', action='store_true', help='train')
 parser.add_argument('-test_app', '--test_app', action='store_true', help='test the app interface')
+parser.add_argument('-train_w2v', '--train_w2v', action='store_true', help='just train w2v')
 parser.add_argument('-source', '--source', type=str, help="Data source: [json|csv|test]")
 parser.add_argument('-model_json_out', '--model_json_out', type=str, default='u45_model.json', help="Path to save model json")
 parser.add_argument('-out_weights', '--out_weights', type=str, default='u45_weights.h5', help="Path to save model weights in h5")
@@ -220,6 +221,10 @@ if __name__ == "__main__":
     
     if args.test_app:
         u45 = U45(data=DATA, lstm_data=LSTM_DATA)
+    
+    if args.train_w2v:
+        u45 = U45(data=DATA, lstm_data=LSTM_DATA)
+        u45.train_w2v()
     
     if args.train:
         u45 = U45(data=DATA, lstm_data=LSTM_DATA)
