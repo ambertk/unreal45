@@ -178,6 +178,8 @@ class U45(object):
                 print
                 print dataDX[i['id_str']]
                 print
+                print dataDX[i['id_str']]['text']
+                print
                 dataDX[i['id_str']]['text'] = self.clean_text(text=dataDX[i['id_str']]['text']).split()
             sys.stderr.write("done.\n")
             # except:
