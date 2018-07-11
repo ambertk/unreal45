@@ -170,15 +170,15 @@ class U45(object):
         dataDX = {}
         for i in jsons:
             sys.stderr.write("Reading {PATH}...".format(PATH=i))
-            try:
-                F = open(i, 'r').read()
-                data = json.loads(F)
-                for i in data:
-                    dataDX[i['id_str']] = i
-                    dataDX[i['id_str']]['text'] = self.clean_text(text=dataDX[i['id_str']]['text']).split()
-                sys.stderr.write("done.\n")
-            except:
-                sys.stderr.write("failed.\n")
+            # try:
+            F = open(i, 'r').read()
+            data = json.loads(F)
+            for i in data:
+                dataDX[i['id_str']] = i
+                dataDX[i['id_str']]['text'] = self.clean_text(text=dataDX[i['id_str']]['text']).split()
+            sys.stderr.write("done.\n")
+            # except:
+            #    sys.stderr.write("failed.\n")
         return dataDX
 
 
