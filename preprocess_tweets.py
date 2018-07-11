@@ -60,7 +60,6 @@ def clean_tweet(tweet):
             t = normalize_case(tweet=t)
             TWEET_OUT.append(t)
     
-    print ' '.join(TWEET_OUT)
     return ' '.join(TWEET_OUT)
 
 def read_jsons(jsons):
