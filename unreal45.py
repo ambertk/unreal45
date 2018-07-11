@@ -174,6 +174,7 @@ class U45(object):
             F = open(i, 'r').read()
             data = json.loads(F)
             for i in data:
+                print i
                 dataDX[i['id_str']] = i
                 dataDX[i['id_str']]['text'] = self.clean_text(text=dataDX[i['id_str']]['text']).split()
             sys.stderr.write("done.\n")
