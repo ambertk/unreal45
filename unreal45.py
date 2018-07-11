@@ -170,20 +170,17 @@ class U45(object):
         dataDX = {}
         for i in jsons:
             sys.stderr.write("Reading {PATH}...".format(PATH=i))
-            # try:
-            F = open(i, 'r').read()
-            data = json.loads(F)
-            for i in data:
-                dataDX[i['id_str']] = i
-                print
-                print dataDX[i['id_str']]
-                print
-                print dataDX[i['id_str']]['text']
-                print
-                dataDX[i['id_str']]['text'] = self.clean_text(text=dataDX[i['id_str']]['text']).split()
-            sys.stderr.write("done.\n")
-            # except:
-            #    sys.stderr.write("failed.\n")
+            try:
+                F = open(i, 'r').read()
+                data = json.loads(F)
+                for i in data:
+                    dataDX[i['id_str']] = i
+                    #dataDX[i['id_str']]['text'] = self.clean_text(text=dataDX[i['id_str']]['text']).split()
+                    dataDX[i['id_str']]['text'] = preprocess_tweets.clean_tweet(tweet=dataDX[i['id_str']]['text'])
+                sys.stderr.write("done.\n")
+            except:
+                sys.stderr.write("failed.\n")
+        preprocess_tweets.write_urls(path="/Users/khambert/hgWD/unreal45/Data/urls.pkl")
         return dataDX
 
 
