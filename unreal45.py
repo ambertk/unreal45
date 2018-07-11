@@ -180,7 +180,7 @@ class U45(object):
                 sys.stderr.write("done.\n")
             except:
                 sys.stderr.write("failed.\n")
-        preprocess_tweets.write_urls(path="/Users/khambert/hgWD/unreal45/Data/urls.pkl")
+        preprocess_tweets.write_urls(path="urls.pkl")
         return dataDX
 
 
