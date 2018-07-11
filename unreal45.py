@@ -14,6 +14,7 @@ import argparse
 import numpy as np
 import tensorflow as tf
 import keras.backend as K
+import preprocess_tweets
 from keras.models import Sequential
 from keras.layers import Dense, Activation
 from keras.layers.embeddings import Embedding
@@ -24,8 +25,9 @@ from keras.layers.recurrent import LSTM
 
 # Command line arguments...
 parser = argparse.ArgumentParser()
+parser.add_argument('-train', '--train', action='store_true', help='train')
 parser.add_argument('-test_app', '--test_app', action='store_true', help='test the app interface')
-parser.add_argument('-source', '--source', type=str, help="Data source: [json|csv]")
+parser.add_argument('-source', '--source', type=str, help="Data source: [json|csv|test]")
 parser.add_argument('-model_json_out', '--model_json_out', type=str, default='u45_model.json', help="Path to save model json")
 parser.add_argument('-out_weights', '--out_weights', type=str, default='u45_weights.h5', help="Path to save model weights in h5")
 
@@ -137,7 +139,7 @@ class U45(object):
         self.pretrained_weights = self.w2v_model.wv.syn0
         self.vocab_size, self.emdedding_size = self.pretrained_weights.shape
 
-    def clean_text(self, text):
+    def clean_text_old(self, text):
         text = text.replace('&amp;', '&')
         #text = re.sub(r'(?:http|ftp|https)://(?:[\w_-]+(?:(?:\.[\w_-]+)+))(?:[\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?', 'URL', text, re.IGNORECASE)
         text = re.sub(r'\s+', ' ', text)
@@ -151,7 +153,9 @@ class U45(object):
         #    text = text.replace(i, '')
         text = text.encode('utf-8')
         return text.strip()
-
+    def clean_text(self, text):
+        pass
+    
     def get_all_sentences(self):
         return [self.dataDX[i]['text'] for i in self.dataDX.keys()]
     
@@ -204,12 +208,20 @@ if __name__ == "__main__":
     if args.source == 'json':
         sources = '*.json'
         lstm_source = 'trump*.json'
+        DATA = glob.glob(os.path.join("Data", sources))
+        LSTM_DATA = glob.glob(os.path.join("Data", lstm_source))
     elif args.source == 'csv':
         sources = '*.csv'
         lstm_source = 'trump*.csv'
-    DATA = glob.glob(os.path.join("Data", sources))
-    LSTM_DATA = glob.glob(os.path.join("Data", lstm_source))
+        DATA = glob.glob(os.path.join("Data", sources))
+        LSTM_DATA = glob.glob(os.path.join("Data", lstm_source))
+    elif args.source == 'test':
+        DATA = os.path.join("Data", "test_data.json")
+    
     if args.test_app:
+        u45 = U45(data=DATA, lstm_data=LSTM_DATA)
+    
+    if args.train:
         u45 = U45(data=DATA, lstm_data=LSTM_DATA)
         u45.model_json_out = args.model_json_out
         u45.out_weights = args.out_weights
